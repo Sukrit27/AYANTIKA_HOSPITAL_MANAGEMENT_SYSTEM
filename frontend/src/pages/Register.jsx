@@ -1,8 +1,8 @@
-import axios from "axios";
 import React, { useContext, useState } from "react";
 import { toast } from "react-toastify";
 import { Context } from "../main";
 import { Link, Navigate, useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const Register = () => {
   const { isAuthenticated, setIsAuthenticated } = useContext(Context);
@@ -15,41 +15,56 @@ const Register = () => {
   const [dob, setDob] = useState("");
   const [gender, setGender] = useState("");
   const [password, setPassword] = useState("");
+  const [role, setRole] = useState("Patient"); // Added this line
 
   const navigateTo = useNavigate();
 
   const handleRegistration = async (e) => {
     e.preventDefault();
     try {
-      await axios
-        .post(
-          "http://localhost:5000/api/v1/user/patient/register",
-          { firstName, lastName, email, phone, nic, dob, gender, password, role: "Patient" },
-          {
-            withCredentials: true,
-            headers: { "Content-Type": "application/json" },
-          }
-        )
-        .then((res) => {
-          toast.success(res.data.message);
-          setIsAuthenticated(true);
-          navigateTo("/");
-          setFirstName("");
-          setLastName("");
-          setEmail("");
-          setPhone("");
-          setNic("");
-          setDob("");
-          setGender("");
-          setPassword("");
-        });
+      const { data } = await axios.post(
+        "http://localhost:5000/api/v1/user/patient/register",
+        {
+          firstName,
+          lastName,
+          email,
+          phone,
+          nic,
+          dob,
+          gender,
+          password,
+          role,
+        },
+        {
+          withCredentials: true,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+
+      toast.success(data.message);
+      setIsAuthenticated(true);
+      navigateTo("/");
+      setFirstName("");
+      setLastName("");
+      setEmail("");
+      setPhone("");
+      setNic("");
+      setDob("");
+      setGender("");
+      setPassword("");
+      setRole("Patient"); // Reset to default
     } catch (error) {
-      toast.error(error.response.data.message);
+      console.error(error);
+      if (error.response?.data?.message) {
+        toast.error(error.response.data.message);
+      } else {
+        toast.error("Registration failed. Please try again.");
+      }
     }
   };
 
   if (isAuthenticated) {
-    return <Navigate to={"/"} />;
+    return <Navigate to="/" />;
   }
 
   return (
@@ -58,9 +73,10 @@ const Register = () => {
         <h2>Sign Up</h2>
         <p>Please Sign Up To Continue</p>
         <p>
-        At MedAlign, we're dedicated to supporting you on your path to better health and recovery. Log in to access your personalized treatment plans, manage appointments, and explore expert resources designed to keep you informed and empowered every step of the way.
-
-Need help? Our team is always here for you — don't hesitate to reach out!
+          At MedAlign, we're dedicated to supporting you on your path to better
+          health and recovery. Log in to access your personalized treatment
+          plans, manage appointments, and explore expert resources designed to
+          keep you informed and empowered every step of the way.
         </p>
         <form onSubmit={handleRegistration}>
           <div>
@@ -99,7 +115,7 @@ Need help? Our team is always here for you — don't hesitate to reach out!
               onChange={(e) => setNic(e.target.value)}
             />
             <input
-              type={"date"}
+              type="date"
               placeholder="Date of Birth"
               value={dob}
               onChange={(e) => setDob(e.target.value)}
@@ -118,6 +134,14 @@ Need help? Our team is always here for you — don't hesitate to reach out!
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
+          <div>
+            {/* 👇 Role Selector */}
+            <select value={role} onChange={(e) => setRole(e.target.value)}>
+              <option value="Patient">Patient</option>
+              <option value="Doctor">Doctor</option>
+              <option value="Admin">Admin</option>
+            </select>
+          </div>
           <div
             style={{
               gap: "10px",
@@ -127,7 +151,7 @@ Need help? Our team is always here for you — don't hesitate to reach out!
           >
             <p style={{ marginBottom: 0 }}>Already Registered?</p>
             <Link
-              to={"/signin"}
+              to="/signin"
               style={{ textDecoration: "none", color: "#271776ca" }}
             >
               Login Now

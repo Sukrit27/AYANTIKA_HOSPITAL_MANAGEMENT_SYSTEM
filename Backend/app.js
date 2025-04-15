@@ -17,10 +17,22 @@ config({ path: "./config/config.env" });
 // Get the directory name equivalent to __dirname in ES module
 const __dirname = path.dirname(fileURLToPath(import.meta.url)); // Added
 
+// app.use(
+//   cors({
+//     origin: true, // or use "*" if you don’t need credentials
+//     methods: ["GET", "POST", "DELETE", "PUT"],
+//     credentials: true,
+//   })
+// );
 app.use(
   cors({
-    origin: [process.env.FRONTEND_URL_ONE, process.env.FRONTEND_URL_TWO],
-    method: ["GET", "POST", "DELETE", "PUT"],
+    origin: [
+      process.env.FRONTEND_URL_ONE,
+      process.env.FRONTEND_URL_TWO,
+      "http://localhost:5173", // ✅ Add this for local dev if not in .env
+      "http://localhost:5174"
+    ],
+    methods: ["GET", "POST", "DELETE", "PUT"], // ✅ 'methods' not 'method'
     credentials: true,
   })
 );
